@@ -1,0 +1,2 @@
+cd course && npm test
+npx lint-staged
