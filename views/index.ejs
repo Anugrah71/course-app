@@ -5,23 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learning Management System</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome <%= user.name %>!</h1>
-    <p>You have joined the following courses:</p>
-    
-    <% user.courses.forEach(course => { %>
-      <div class="course-card">
-        <h2><%= course.title %></h2>
-        <p><strong><%= course.educator %></strong></p>
-        <p>👨‍🎓 <%= course.students %> students</p>
-        <div class="buttons">
-          <button class="continue-btn">Continue</button>
-          <button class="completed-btn">Completed: <%= course.progress %>%</button>
-        </div>
-      </div>
-    <% }); %>
-  </div>
+  
+    <h1 class="text-center font-semibold text-7xl">Learning Management System</h1>
+    <br>
+    <a href="#" class="ml-64">Sign in</a>
+    <br>
+    <a href="#" class="ml-64"></a>Sign up</a>
+  
 </body>
 </html>

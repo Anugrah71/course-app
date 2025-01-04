@@ -21,7 +21,7 @@ const userData = {
 
 // Route to render the page
 app.get("/", (req, res) => {
-  res.render("index", { user: userData });
+  res.render("signup", { user: userData });
 });
 
 module.exports = app;
