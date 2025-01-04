@@ -11,6 +11,11 @@
     <div class="grid grid-cols-6">
       <div class="col-start-3 col-span-2">
         <h6 class="py-4">Login to your account</h6>
+        <% if(message && message.error && message.error.length > 0)  { %>
+          <% for(var i=0; i<message.error.length; i++) { %>
+                  <li class="pt-2 text-red-600" type="none"> <%= message.error[i] %></li>
+          <% } %>
+        <% } %>
         <form action="/session" method="post" >
           <div class="py-3">
             <label for="email">Email</label>
