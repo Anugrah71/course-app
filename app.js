@@ -79,7 +79,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/signup", (req, res) => {
-  res.render("signup");
+  res.render("adminView");
 });
 app.post("/users", async (req, res) => {
   try {
