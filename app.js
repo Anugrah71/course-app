@@ -79,7 +79,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/signup", (req, res) => {
-  res.render("adminView");
+  res.render("signup");
 });
 app.post("/users", async (req, res) => {
   try {
@@ -96,14 +96,17 @@ app.post("/users", async (req, res) => {
       password: hashedPassword,
       role,
     });
-    res.status(201).send({ message: "User created successfully!", user });
+    req.login(user, (error) => {
+      if (error) return res.status(500).send("Error during login");
+      if (req.user.role === "educator") {
+        res.render("educator");
+      } else {
+        res.render("student");
+      }
+    });
   } catch (error) {
-    console.error("Error creating user:", error.message);
-
-    // Send error response
-    res
-      .status(500)
-      .send({ error: "Internal Server Error", details: error.message });
+    console.log(error);
+    res.status(500).send("Error creating user");
   }
 });
 
@@ -115,8 +118,30 @@ app.post(
   }),
   (req, res) => {
     req.flash("success", "Login successful!"); // Flash message on success
-    res.redirect("/"); // Redirect to a protected page
+    if (req.user.role === "educator") {
+      res.render("educator", {
+        title: "Educator Dashboard",
+        user: req.user,
+      });
+    } else if (req.user.role === "student") {
+      res.render("student", {
+        title: "Student Dashboard",
+        user: req.user,
+      });
+    } else {
+      res.redirect("/"); // Redirect to a different page for other users
+    }
   },
 );
 
+app.get("/signout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err); // Handle logout error
+    res.redirect("/"); // Redirect to the home page
+  });
+});
+
+app.get("/newcourse", (req, res) => {
+  res.render("course");
+});
 module.exports = app;
