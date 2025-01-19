@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 
-const { User } = require("./models");
+const { User , Course ,Chapter , Page } = require("./models");
 
 const passport = require("passport");
 
@@ -12,6 +12,15 @@ const flash = require("connect-flash");
 const LocalStrategy = require("passport-local").Strategy;
 
 const bcrypt = require("bcrypt");
+const chapter = require("./models/chapter");
+
+const ensureAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  req.flash("error", "Please log in to access this page.");
+  res.redirect("/login");
+};
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -144,4 +153,50 @@ app.get("/signout", (req, res, next) => {
 app.get("/newcourse", (req, res) => {
   res.render("course");
 });
+app.get("/my-course", async (req, res) => {
+  try {
+    const courses = await Course.MyCourse(req.user.id);
+    res.render("myCourses", { courses });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching courses");
+  }
+});
+app.post("/course", ensureAuthenticated, async (req, res) => {
+  if (!req.user) {
+    req.flash("error", "User not authenticated.");
+    return res.redirect("/login");
+  }
+
+  try {
+    const newCourse = await Course.addcourse({
+      title: req.body.title,
+      description: req.body.description,
+      educatorId: req.user.id, // Accessing educatorId from the authenticated user
+    });
+    res.render("chapter");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error creating course");
+  }
+});
+
+app.post("/new-chapter", ensureAuthenticated, async (req, res) => {
+  if (!req.user) {
+    req.flash("error", "User not authenticated.");
+    return res.redirect("/login");
+  }
+
+  try {
+    const newChapter = await Chapter.addChapter({
+      title: req.body.title,
+      courseId: req.user.id, // Accessing educatorId from the authenticated user
+    });
+    res.render("page");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error creating course");
+  }
+});
+
 module.exports = app;

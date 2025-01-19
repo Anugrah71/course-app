@@ -3,63 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
-    <link rel="stylesheet" href="./css/stylee.css" />
+    <title>Signup</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <div class="grid grid-cols-6">
-      <div class="col-start-3 col-span-2">
-        <h6 class="py-4">Signup as a new user</h6>
-        <form action="/users" method="post">
-          <div class="py-3">
-            <label for="name">Name</label>
-            <input
-              type="text"
-              name="name"
-              class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
-              required
-            />
-          </div>
-          <div class="py-3">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              name="email"
-              class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
-              required
+  <body class="font-serif bg-gray-100">
+    <header class="bg-gray-800 text-white p-4 flex justify-between items-center">
+      <div class="text-lg font-semibold">Learning Management System</div>
+      <a href="/" class="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded">Home</a>
+    </header>
 
-            />
-          </div>
-          <div class="py-3">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              name="password"
-              class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
-              required
-            />
-          </div>
-          <div class="py-3">
-            <label for="role">Role</label>
-            <select id="role"
-              name="role"
-              class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
-              required
-            >
-            <option value="educator">Educator</option>
-              <option value="student">Student</option>
-            </select>
-          </div>
-          <div class="py-3">
-            <button
-              type="submit"
-              class="text-white bg-green-600 hover:bg-green-800 px-5 py-1.5 rounded font-medium mr-2 mb-2"
-            >
-              Sign up
-            </button>
-          </div>
-        </form>
+    <div class="container mx-auto p-6">
+      <div class="grid grid-cols-6">
+        <div class="col-start-3 col-span-2 bg-white border border-gray-200 rounded-lg shadow-md p-6">
+          <h1 class="text-2xl font-bold text-gray-800 mb-4">Signup as a New User</h1>
+          <form action="/users" method="post">
+            <div class="mb-4">
+              <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+              <select
+                id="role"
+                name="role"
+                class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full"
+                required
+              >
+                <option value="educator">Educator</option>
+                <option value="student">Student</option>
+              </select>
+            </div>
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="bg-gray-800 hover:bg-gray-600 text-white px-5 py-2 rounded font-medium"
+              >
+                Sign Up
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </body>

@@ -29,7 +29,18 @@ module.exports = (sequelize, DataTypes) => {
         as: "students",
       });
     }
+    static addcourse({ title, description, educatorId }) {
+      return this.create({ name:title, description, educatorId });
+    }
+    static async MyCourse(userId){
+      return this.findAll({
+        where:{
+          educatorId:userId,
+        },
+      });
+    }
   }
+
   Course.init(
     {
       name: DataTypes.STRING,
