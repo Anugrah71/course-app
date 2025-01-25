@@ -15,6 +15,13 @@ module.exports = (sequelize, DataTypes) => {
         as: "chapter",
       });
     }
+    static addPage({ title, content, ChapterId }) {
+      return this.create({
+        title: title,
+        content: content,
+        chapterId: ChapterId,
+      });
+    }
   }
   Page.init(
     {

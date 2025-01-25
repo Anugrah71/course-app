@@ -1,33 +1,28 @@
+/* eslint-disable no-undef */
 const express = require("express");
+const bodyParser = require("body-parser");
+const passport = require("passport");
+const session = require("express-session");
+const flash = require("connect-flash");
+const LocalStrategy = require("passport-local").Strategy;
+const bcrypt = require("bcrypt");
+
+const { User, Course, Chapter, Page } = require("./models");
+// const { where } = require("sequelize");
+// const chapter = require("./models/chapter");
+// const { name } = require("ejs");
+
 const app = express();
 
-const { User , Course ,Chapter , Page } = require("./models");
-
-const passport = require("passport");
-
-const session = require("express-session");
-
-const flash = require("connect-flash");
-
-const LocalStrategy = require("passport-local").Strategy;
-
-const bcrypt = require("bcrypt");
-const chapter = require("./models/chapter");
-
-const ensureAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  req.flash("error", "Please log in to access this page.");
-  res.redirect("/login");
-};
-
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    secret: "your_secret_key", // Change this to something secret
+    secret: "your_secret_key", // Change this to a secure key
     resave: false,
     saveUninitialized: false,
   }),
@@ -37,10 +32,18 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.set("view engine", "ejs");
+app.use(express.static("public")); // Serve static files like CSS
 
-// Serve static files like CSS
-app.use(express.static("public"));
+// Authentication Middleware
+const ensureAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  req.flash("error", "Please log in to access this page.");
+  res.redirect("/login");
+};
 
+// Passport Configuration
 passport.use(
   new LocalStrategy(
     { usernameField: "email", passwordField: "password" },
@@ -48,23 +51,20 @@ passport.use(
       try {
         const user = await User.findOne({ where: { email } });
         if (user && (await bcrypt.compare(password, user.password))) {
-          return done(null, user); // Authentication success
-        } else {
-          return done(null, false, { message: "Invalid email or password!" }); // Authentication failure
+          return done(null, user);
         }
+        return done(null, false, { message: "Invalid email or password!" });
       } catch (error) {
-        return done(error); // Error handling
+        return done(error);
       }
     },
   ),
 );
 
-// Serialize user info into session
 passport.serializeUser((user, done) => {
-  done(null, user.id); // Store only the user id
+  done(null, user.id);
 });
 
-// Deserialize user from session
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findByPk(id);
@@ -74,10 +74,11 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Route to render the page
+// Routes
 app.get("/", (req, res) => {
   res.render("index");
 });
+
 app.get("/login", (req, res) => {
   res.render("login", {
     message: {
@@ -90,6 +91,7 @@ app.get("/login", (req, res) => {
 app.get("/signup", (req, res) => {
   res.render("signup");
 });
+
 app.post("/users", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -97,24 +99,23 @@ app.post("/users", async (req, res) => {
     if (!name || !email || !password || !role) {
       return res.status(400).send("All fields are required!");
     }
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
     });
+
     req.login(user, (error) => {
       if (error) return res.status(500).send("Error during login");
-      if (req.user.role === "educator") {
-        res.render("educator");
-      } else {
-        res.render("student");
-      }
+
+      const redirectPage = user.role === "educator" ? "educator" : "student";
+      res.render(redirectPage);
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send("Error creating user");
   }
 });
@@ -122,38 +123,47 @@ app.post("/users", async (req, res) => {
 app.post(
   "/session",
   passport.authenticate("local", {
-    failureRedirect: "/login", // Redirect to login page on failure
-    failureFlash: true, // Show flash message on failure
+    failureRedirect: "/login",
+    failureFlash: true,
   }),
   (req, res) => {
-    req.flash("success", "Login successful!"); // Flash message on success
-    if (req.user.role === "educator") {
-      res.render("educator", {
-        title: "Educator Dashboard",
-        user: req.user,
-      });
-    } else if (req.user.role === "student") {
-      res.render("student", {
-        title: "Student Dashboard",
-        user: req.user,
-      });
-    } else {
-      res.redirect("/"); // Redirect to a different page for other users
-    }
+    req.flash("success", "Login successful!");
+    const dashboard = req.user.role === "educator" ? "educator" : "student";
+    res.render(dashboard, {
+      title: `${dashboard.charAt(0).toUpperCase() + dashboard.slice(1)} Dashboard`,
+      user: req.user,
+    });
   },
 );
 
 app.get("/signout", (req, res, next) => {
   req.logout((err) => {
-    if (err) return next(err); // Handle logout error
-    res.redirect("/"); // Redirect to the home page
+    if (err) return next(err);
+    res.redirect("/");
   });
 });
 
-app.get("/newcourse", (req, res) => {
+app.get("/newcourse", ensureAuthenticated, (req, res) => {
   res.render("course");
 });
-app.get("/my-course", async (req, res) => {
+
+app.post("/course", ensureAuthenticated, async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const newCourse = await Course.create({
+      name,
+      description,
+      educatorId: req.user.id,
+    });
+    req.session.newCourseId = newCourse.id;
+    res.render("chapter", { courseId: newCourse.id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error creating course");
+  }
+});
+
+app.get("/my-course", ensureAuthenticated, async (req, res) => {
   try {
     const courses = await Course.MyCourse(req.user.id);
     res.render("myCourses", { courses });
@@ -162,40 +172,40 @@ app.get("/my-course", async (req, res) => {
     res.status(500).send("Error fetching courses");
   }
 });
-app.post("/course", ensureAuthenticated, async (req, res) => {
-  if (!req.user) {
-    req.flash("error", "User not authenticated.");
-    return res.redirect("/login");
-  }
 
+app.post("/new-chapter", ensureAuthenticated, async (req, res) => {
   try {
-    const newCourse = await Course.addcourse({
-      title: req.body.title,
-      description: req.body.description,
-      educatorId: req.user.id, // Accessing educatorId from the authenticated user
-    });
-    res.render("chapter");
+    const { title } = req.body;
+    const newCourseId = req.session.newCourseId;
+    if (!newCourseId) {
+      throw new Error("Course ID not found in session");
+    }
+    const newChapter = await Chapter.create({ title, courseId: newCourseId });
+    req.session.newChapterId = newChapter.id;
+
+    res.render("page", { chapter: newChapter });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error creating course");
+    res.status(500).send("Error creating chapter");
   }
 });
 
-app.post("/new-chapter", ensureAuthenticated, async (req, res) => {
-  if (!req.user) {
-    req.flash("error", "User not authenticated.");
-    return res.redirect("/login");
-  }
-
+app.post("/page-save", ensureAuthenticated, async (req, res) => {
   try {
-    const newChapter = await Chapter.addChapter({
-      title: req.body.title,
-      courseId: req.user.id, // Accessing educatorId from the authenticated user
+    const newChapterId = req.session.newChapterId;
+    if (!newChapterId) {
+      throw new Error("Chapter ID not found in session");
+    }
+    const { title, content } = req.body;
+    await Page.create({
+      title,
+      content,
+      chapterId: newChapterId,
     });
-    res.render("page");
+    res.status(200).send("Page created successfully");
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error creating course");
+    res.status(500).send("Error creating page");
   }
 });
 
