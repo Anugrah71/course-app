@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-serif bg-gray-100">
+  <header class="bg-gray-800 text-white p-4 flex justify-between items-center">
+    <div class="text-lg font-semibold">Learning Management System</div>
+    <a href="/signout" class="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded">Signout</a>
+  </header>
+
+  <div class="container mx-auto p-6">
+    <nav class="text-sm mb-4">
+      <a href="/home" class="text-blue-600 hover:underline">Home</a>
+      <span class="mx-2">›</span>
+      <span class="text-gray-500">New Page</span>
+    </nav>
+
+    <div class="bg-white border border-gray-200 rounded-lg shadow-md p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">New Page</h1>
+      <form action="/newpagesave" method="POST">
+        
+        <!-- Course Selection -->
+        <div class="mb-4">
+          <label for="CourseId" class="block text-sm font-medium text-gray-700">Select a Course</label>
+          <select id="CourseId" name="CourseId" class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full" required onchange="updateChapters()">
+            <option value="" disabled selected>Select a Course</option>
+            <% courses.forEach(course => { %>
+              <option value="<%= course.id %>"><%= course.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Chapter Selection -->
+        <div class="mb-4">
+          <label for="chapId" class="block text-sm font-medium text-gray-700">Select a Chapter</label>
+          <select id="chapId" name="chapId" class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full" required>
+            <option value="" disabled selected>Select a Chapter</option>
+          </select>
+        </div>
+
+        <!-- Title Input -->
+        <div class="mb-4">
+          <label for="title" class="block text-sm font-medium text-gray-700">Page Title</label>
+          <input type="text" id="title" name="title" placeholder="Enter title" class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full" required />
+        </div>
+
+        <!-- Content Input -->
+        <div class="mb-6">
+          <label for="content" class="block text-sm font-medium text-gray-700">Page Content</label>
+          <textarea id="content" name="content" rows="10" placeholder="Enter content here" class="border border-gray-300 text-sm rounded p-2 text-gray-900 w-full" required></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end">
+          <button type="submit" class="bg-green-600 hover:bg-green-800 text-white px-5 py-2 rounded font-medium">
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const courses = JSON.parse('<%- JSON.stringify(courses) %>');
+
+    function updateChapters() {
+        const courseId = document.getElementById('CourseId').value;
+        const chapterSelect = document.getElementById('chapId');
+        chapterSelect.innerHTML = '<option value="" disabled selected>Select a Chapter</option>';
+
+        const selectedCourse = courses.find(course => course.id == courseId);
+        if (selectedCourse) {
+            selectedCourse.chapters.forEach(chapter => {
+                const option = document.createElement('option');
+                option.value = chapter.id;
+                option.textContent = chapter.title;
+                chapterSelect.appendChild(option);
+            });
+        }
+    }
+  </script>
+</body>
+</html>

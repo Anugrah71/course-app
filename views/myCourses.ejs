@@ -13,7 +13,6 @@
     </header>
 
     <div class="container mx-auto p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Welcome John Doe!</h1>
 
         <div class="mb-6 space-x-4">
             <a  href="/newcourse"class="bg-gray-600 hover:bg-gray-800 text-white py-2 px-4 rounded">Create a new course</a>
@@ -26,18 +25,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <% courses.forEach(course => { %>
             <div class="bg-white border border-gray-200 rounded-lg shadow-md p-4">
-                <h3 class="text-lg font-semibold text-gray-800"><%= course.title %></h3>
-                <p class="text-sm text-gray-600 mb-4"><%= course.description %></p>
+                <h3 class="text-lg font-semibold text-gray-800"><%= course.name %></h3>
+                <p class="text-sm text-gray-600 mb-4">Educator: <%= course.educator.name %></p>
+                <p class="text-sm text-gray-600 mb-4">description: <%= course.description %></p>
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-500 text-sm">&#128101; 279</span>
-                    <button class="bg-cyan-500 hover:bg-cyan-700 text-white py-1 px-3 rounded">Enroll</button>
-                </div>
-                
+                    <span class="text-gray-500 text-sm">&#128101; 211</span>
+                    <a href="/course/<%= course.id %>" class="bg-cyan-500 hover:bg-cyan-700 text-white py-1 px-3 rounded">Enter Course</a>
+                    </div>
             </div>
             <% }); %>
-            
-            
-           
         </div>
     </div>
 </body>

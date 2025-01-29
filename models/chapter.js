@@ -17,9 +17,6 @@ module.exports = (sequelize, DataTypes) => {
         as: "pages",
       });
     }
-    static addChapter({ title, courseId }) {
-      return this.create({ title: title, courseId });
-    }
   }
   Chapter.init(
     {
